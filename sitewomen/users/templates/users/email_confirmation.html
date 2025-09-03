@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Подтверждение email</title>
+</head>
+<body>
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
+        <h2 style="color: #f97316;">Подтверждение email адреса</h2>
+
+        <p>Здравствуйте, {{ user.first_name }}!</p>
+
+        <p>Благодарим вас за регистрацию. Для завершения регистрации пожалуйста подтвердите ваш email адрес, перейдя по ссылке ниже:</p>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="http://{{ domain }}{% url 'confirm_email' token=confirmation.token %}"
+               style="background-color: #f97316; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                Подтвердить Email
+            </a>
+        </div>
+
+        <p>Если вы не регистрировались на нашем сайте, пожалуйста, проигнорируйте это письмо.</p>
+
+        <p>Ссылка действительна в течение 24 часов.</p>
+
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+        <p style="color: #666; font-size: 12px;">
+            Если кнопка не работает, скопируйте и вставьте в браузер следующую ссылку:<br>
+            http://{{ domain }}{% url 'confirm_email' token=confirmation.token %}
+        </p>
+    </div>
+</body>
+</html>

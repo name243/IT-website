@@ -1,0 +1,991 @@
+
+{% load static %}
+{% csrf_token %}
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Панфилов: Подготовка к ЕГЭ и ОГЭ по информатике</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="https://img.icons8.com/fluency/48/000000/owl.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, rgba(253,186,116,0.9) 0%, rgba(249,115,22,0.9) 100%);
+        }
+
+        .owl-logo {
+            position: relative;
+        }
+
+        .owl-logo::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: rgba(249, 115, 22, 0.2);
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulse 2s infinite;
+        }
+
+        .nav-link {
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: #f97316;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link.active::after,
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.7;
+            }
+            70% {
+                transform: scale(1.05);
+                opacity: 0.4;
+            }
+            100% {
+                transform: scale(0.95);
+                opacity: 0.7;
+            }
+        }
+
+        .testimonial-card {
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .benefit-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: rgba(249, 115, 22, 0.1);
+            margin-bottom: 15px;
+        }
+
+        @keyframes rock {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(20px); }
+        }
+
+        .rocking-photo {
+            animation: rock 6s ease-in-out infinite;
+        }
+        /* Стили для мобильного меню */
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+
+        .hamburger-line {
+            transition: all 0.3s ease;
+        }
+
+        .hamburger.active .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .hamburger.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        .menu-overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="owl-logo">
+                    <img src="https://img.icons8.com/fluency/48/000000/owl.png" alt="Логотип" class="w-10 h-10">
+                </div>
+                <span class="text-xl font-bold text-orange-600">IT Панфилов</span>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center justify-center flex-1 space-x-8">
+    <a href="javascript:void(0)" class="text-gray-700 hover:text-orange-600 transition nav-link" onclick="scrollToSection('home')">Главная</a>
+    <a href="javascript:void(0)" class="text-gray-700 hover:text-orange-600 transition nav-link" onclick="scrollToSection('about')">Обо мне</a>
+    <a href="javascript:void(0)" class="text-gray-700 hover:text-orange-600 transition nav-link" onclick="scrollToSection('benefits')">Преимущества</a>
+    <a href="javascript:void(0)" class="text-gray-700 hover:text-orange-600 transition nav-link" onclick="scrollToSection('courses')">Курсы</a>
+    <a href="javascript:void(0)" class="text-gray-700 hover:text-orange-600 transition nav-link" onclick="scrollToSection('reviews')">Отзывы</a>
+</div>
+
+            <div class="hidden md:flex space-x-4">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}" class="relative bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 group">
+                        <i class="fas fa-user-circle mr-2 text-sm transition-all duration-300 group-hover:text-orange-200"></i>Личный кабинет
+                        <span class="absolute inset-0 border-2 border-transparent group-hover:border-orange-300 rounded-lg transition-all duration-300 pointer-events-none"></span>
+                    </a>
+                    <form method="post" action="{% url 'logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="border-2 border-orange-600 text-orange-600 px-4 py-2 rounded-lg font-semibold hover:bg-orange-50 transition">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Выйти
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="border border-orange-600 text-orange-600 px-4 py-2 rounded-lg font-medium hover:bg-orange-50 transition">
+                        Вход
+                    </a>
+                    <a href="{% url 'register' %}" class="bg-gradient-to-r from-orange-600 to-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-700 hover:to-orange-600 transition shadow-md hover:shadow-lg">
+                        Регистрация
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile Hamburger -->
+            <div class="md:hidden">
+                <button id="hamburger" class="hamburger flex flex-col space-y-1.5 w-6 h-6 justify-center items-center relative z-60">
+                    <span class="hamburger-line w-6 h-0.5 bg-orange-600"></span>
+                    <span class="hamburger-line w-6 h-0.5 bg-orange-600"></span>
+                    <span class="hamburger-line w-6 h-0.5 bg-orange-600"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="menuOverlay" class="menu-overlay fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="mobile-menu fixed top-0 right-0 w-80 h-full bg-white shadow-2xl z-50 overflow-y-auto md:hidden">
+            <div class="p-6 space-y-6">
+                <div class="flex justify-between items-center border-b border-gray-200 pb-4">
+                    <div class="flex items-center space-x-2">
+                        <img src="https://img.icons8.com/fluency/48/000000/owl.png" alt="Логотип" class="w-8 h-8">
+                        <span class="text-lg font-bold text-orange-600">IT Панфилов</span>
+                    </div>
+                    <button id="closeMenu" class="text-gray-500 hover:text-orange-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <a href="#home" class="block text-gray-700 hover:text-orange-600 transition nav-link px-3 py-2 rounded hover:bg-orange-50" onclick="closeMobileMenu()">Главная</a>
+                    <a href="#about" class="block text-gray-700 hover:text-orange-600 transition nav-link px-3 py-2 rounded hover:bg-orange-50" onclick="closeMobileMenu()">Обо мне</a>
+                    <a href="#benefits" class="block text-gray-700 hover:text-orange-600 transition nav-link px-3 py-2 rounded hover:bg-orange-50" onclick="closeMobileMenu()">Преимущества</a>
+                    <a href="#courses" class="block text-gray-700 hover:text-orange-600 transition nav-link px-3 py-2 rounded hover:bg-orange-50" onclick="closeMobileMenu()">Курсы</a>
+                    <a href="#reviews" class="block text-gray-700 hover:text-orange-600 transition nav-link px-3 py-2 rounded hover:bg-orange-50" onclick="closeMobileMenu()">Отзывы</a>
+                    <a href="{% url 'materials' %}" class="free-materials-btn block text-orange-600 font-semibold px-4 py-2.5 rounded-lg text-center transition duration-300 hover:free-materials-btn-active" onclick="closeMobileMenu()">
+                        <i class="fas fa-gift mr-2"></i>Бесплатные материалы
+                    </a>
+                </div>
+
+                <div class="border-t border-gray-200 pt-6">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profile' %}" class="block relative bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 group mb-4 text-center" onclick="closeMobileMenu()">
+                            <i class="fas fa-user-circle mr-2 text-sm transition-all duration-300 group-hover:text-orange-200"></i>Личный кабинет
+                            <span class="absolute inset-0 border-2 border-transparent group-hover:border-orange-300 rounded-lg transition-all duration-300 pointer-events-none"></span>
+                        </a>
+                        <form method="post" action="{% url 'logout' %}" class="inline-block w-full">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full border-2 border-orange-600 text-orange-600 px-4 py-2.5 rounded-lg font-semibold hover:bg-orange-50 transition text-center" onclick="closeMobileMenu()">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Выйти
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="block border border-orange-600 text-orange-600 px-4 py-2 rounded-lg font-medium hover:bg-orange-50 transition mb-3 text-center" onclick="closeMobileMenu()">
+                            Вход
+                        </a>
+                        <a href="{% url 'register' %}" class="block bg-gradient-to-r from-orange-600 to-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-700 hover:to-orange-600 transition shadow-md hover:shadow-lg text-center" onclick="closeMobileMenu()">
+                            Регистрация
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Социальные сети в мобильном меню -->
+                <div class="border-t border-gray-200 pt-6">
+                    <h4 class="text-lg font-semibold mb-4 text-gray-800">Социальные сети</h4>
+                    <div class="flex space-x-4">
+                        <a href="{% url 'vk' %}" class="bg-gray-100 text-orange-600 w-12 h-12 rounded-full flex items-center justify-center hover:bg-orange-600 hover:text-white transition">
+                            <i class="fab fa-vk"></i>
+                        </a>
+                        <a href="{% url 'tg' %}" class="bg-gray-100 text-orange-600 w-12 h-12 rounded-full flex items-center justify-center hover:bg-orange-600 hover:text-white transition">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                        <a href="{% url 'youtube' %}" class="bg-gray-100 text-orange-600 w-12 h-12 rounded-full flex items-center justify-center hover:bg-orange-600 hover:text-white transition">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-gradient text-white py-20">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-10 md:mb-0">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6">Успешная подготовка к ЕГЭ и ОГЭ по информатике</h1>
+                <p class="text-xl mb-8">Более 4 лет я помогаю школьникам успешно сдать ОГЭ и ЕГЭ по информатике. Индивидуальный подход, эффективные методики, высокие результаты.</p>
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#contact" class="bg-white text-orange-600 px-6 py-3 rounded-lg font-semibold text-center hover:bg-gray-100 transition" onclick="scrollToElement()">Записаться на занятие</a>
+                    <a href="{% url 'materials' %}" class="bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold text-center hover:bg-orange-700 transition">Бесплатные материалы</a>
+                </div>
+            </div>
+            <div class="md:w-1/2 flex justify-center">
+
+                <div class="relative">
+                    <img src="https://sun9-1.userapi.com/s/v1/if2/gWSXjMdC6YGQwWSGTbtDsiHUQSOUjkJdKD-5kgCt3KpbISdThJcQjrltJfkiAq1trXRfbS6HGbc-XNCNBU2dtgYx.jpg?quality=95&as=32x21,48x32,72x48,108x72,160x107,240x160,360x240,480x320,540x360,640x427,720x480,1080x720,1280x853,1440x960,2560x1707&from=bu&cs=2560x0" alt="Евгений Панфилов" class="rounded-lg shadow-xl w-full ">
+                    <div class="absolute -bottom-5 -right-5 bg-orange-600 text-white px-4 py-2 rounded-lg shadow-lg ">
+                        <p class="font-bold" id="about">Средний балл учеников ЕГЭ: 82.97</p>
+                        <p class="font-bold" >Средний балл учеников ОГЭ: 5.0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section  class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Обо мне</h2>
+                <div class="w-20 h-1 bg-orange-600 mx-auto"></div>
+            </div>
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/3 mb-8 md:mb-0 flex justify-center">
+                    <img src="{% static 'women/qqq.png' %}" alt="Евгений Панфилов" class="  border-orange-100 rocking-photo">
+                </div>
+                <div class="md:w-2/3 md:pl-12">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-4">Доброго времени суток! Меня зовут Панфилов Евгений</h3>
+                    <p class="text-gray-600 mb-4">Я более 4 лет помогаю школьникам успешно сдавать ОГЭ и ЕГЭ по информатике. Имею образование в области информационных технологий, что позволяет мне не только преподавать предмет на высоком уровне, но и видеть его связь с реальной IT-практикой.</p>
+                    <p class="text-gray-600 mb-6">Моя цель – не просто подготовить к экзамену, а дать глубокие знания и уверенность в своих силах. Занятия проходят в комфортной атмосфере, с индивидуальным подходом к каждому ученику.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex items-center">
+                            <div class="bg-orange-100 text-orange-600 p-2 rounded-full mr-3">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <span class="text-gray-700">Образование в IT-сфере</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-orange-100 text-orange-600 p-2 rounded-full mr-3">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <span class="text-gray-700">4+ года преподавания</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-orange-100 text-orange-600 p-2 rounded-full mr-3">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-700">Высокие результаты учеников</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-orange-100 text-orange-600 p-2 rounded-full mr-3">
+                                <i class="fas fa-user-friends"></i>
+                            </div>
+                            <span class="text-gray-700" id="benefits">Индивидуальный подход</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Me Section -->
+    <section  class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Почему выбирают IT Панфилов</h2>
+                <div class="w-20 h-1 bg-orange-600 mx-auto"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition">
+                    <div class="benefit-icon mx-auto">
+                        <i class="fas fa-chalkboard-teacher text-2xl text-orange-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-center mb-3">Опытный преподаватель</h3>
+                    <p class="text-gray-600 text-center">Более 4 лет опыта преподавания, глубокие знания в IT-практике, позволяющие объяснять сложные темы простым языком.</p>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition">
+                    <div class="benefit-icon mx-auto">
+                        <i class="fas fa-trophy text-2xl text-orange-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-center mb-3">Высокие результаты</h3>
+                    <p class="text-gray-600 text-center">Средний балл ЕГЭ в 2025 - 82.97, ОГЭ - 5.0. Мои ученики регулярно получают высокие баллы на экзаменах.</p>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition">
+                    <div class="benefit-icon mx-auto">
+                        <i class="fas fa-user-graduate text-2xl text-orange-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-center mb-3">Индивидуальный подход</h3>
+                    <p class="text-gray-600 text-center">Учет особенностей каждого ученика, адаптация программы под уровень знаний и темп усвоения материала.</p>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition">
+                    <div class="benefit-icon mx-auto">
+                        <i class="fas fa-heart text-2xl text-orange-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-center mb-3">Комфортная обстановка</h3>
+                    <p class="text-gray-600 text-center">Занятия проходят в доброжелательной атмосфере, где можно не бояться задавать вопросы и ошибаться.</p>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition">
+                    <div class="benefit-icon mx-auto">
+                        <i class="fas fa-lightbulb text-2xl text-orange-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-center mb-3">Проверенные методики</h3>
+                    <p class="text-gray-600 text-center">Эффективные и современные методы обучения, проверенные на практике и дающие стабильные результаты.</p>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition">
+                    <div class="benefit-icon mx-auto">
+                        <i class="fas fa-laptop-code text-2xl text-orange-600"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-center mb-3">IT-практика</h3>
+                    <p class="text-gray-600 text-center">Связь теории с реальной IT-практикой, что делает обучение более интересным и понятным.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What You Get Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Что вы получите от занятий</h2>
+                <div class="w-20 h-1 bg-orange-600 mx-auto"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="flex items-start">
+                    <div class="bg-orange-100 text-orange-600 p-3 rounded-full mr-4 mt-1">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Качественный учебный план</h3>
+                        <p class="text-gray-600">Структурированная программа подготовки, охватывающая все темы экзамена с учетом индивидуальных особенностей ученика.</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="bg-orange-100 text-orange-600 p-3 rounded-full mr-4 mt-1">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Видеозаписи лекций</h3>
+                        <p class="text-gray-600">Возможность пересмотреть материал в любое время, чтобы закрепить знания или восполнить пропущенное занятие.</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="bg-orange-100 text-orange-600 p-3 rounded-full mr-4 mt-1">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Личный кабинет ученика</h3>
+                        <p class="text-gray-600">Доступ к учебным материалам, домашним заданиям и статистике прогресса в одном месте.</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="bg-orange-100 text-orange-600 p-3 rounded-full mr-4 mt-1">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Занятия онлайн</h3>
+                        <p class="text-gray-600">Удобный формат обучения из любой точки мира без потери качества преподавания.</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="bg-orange-100 text-orange-600 p-3 rounded-full mr-4 mt-1">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2">Отчеты о прогрессе</h3>
+                        <p class="text-gray-600">Ежемесячные отчеты о проделанной работе и достигнутых результатах для вас и родителей.</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="bg-orange-100 text-orange-600 p-3 rounded-full mr-4 mt-1">
+                        <i class="fas fa-smile"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-2" >Увлекательные занятия</h3>
+                        <p class="text-gray-600" id="courses">Интересные и динамичные уроки, которые мотивируют к изучению предмета и достижению высоких результатов.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Courses Section -->
+    <section  class="py-16 bg-orange-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Формы занятий</h2>
+                <div class="w-20 h-1 bg-orange-600 mx-auto"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-orange-600 transform hover:scale-105 transition duration-300">
+                    <div class="text-center mb-6">
+                        <div class="bg-orange-100 text-orange-600 p-4 rounded-full inline-block">
+                            <i class="fas fa-user text-3xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-center mb-4">Индивидуальные занятия</h3>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-orange-600 mt-1 mr-2"></i>
+                            <span>100% внимания преподавателя</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-orange-600 mt-1 mr-2"></i>
+                            <span>Гибкий график занятий</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-orange-600 mt-1 mr-2"></i>
+                            <span>Персональная программа</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-orange-600 mt-1 mr-2"></i>
+                            <span>Максимальная эффективность</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-orange-600 mt-1 mr-2"></i>
+                            <span>Коррекция под ваш темп</span>
+                        </li>
+                    </ul>
+                    <div class="text-center">
+                        <a href="{% url 'zapis' %}" class="bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold inline-block hover:bg-orange-700 transition">Записаться</a>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-orange-600 transform hover:scale-105 transition duration-300">
+                    <div class="text-center mb-6">
+                        <div class="bg-orange-100 text-orange-600 p-4 rounded-full inline-block">
+                            <i class="fas fa-users text-3xl"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-center mb-4">Мини-группы (2-4 человека)</h3>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-orange-600 mt-1 mr-2"></i>
+                            <span>Экономия бюджета</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-orange-600 mt-1 mr-2"></i>
+                            <span>Здоровая конкуренция</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-orange-600 mt-1 mr-2"></i>
+                            <span>Групповая динамика</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-orange-600 mt-1 mr-2"></i>
+                            <span>Обсуждение и дискуссии</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-orange-600 mt-1 mr-2"></i>
+                            <span>Возможность учиться у других</span>
+                        </li>
+                    </ul>
+                    <div class="text-center">
+                        <a href="{% url 'zapis' %}" id="reviews" class="bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold inline-block hover:bg-orange-700 transition">Записаться</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section  class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Отзывы учеников</h2>
+                <div class="w-20 h-1 bg-orange-600 mx-auto"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="testimonial-card bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-orange-100 text-orange-600 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Екатерина Алисейчик</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic">"Спасибо большое Евгению Александровичу за помощь в подготовке к экзаменам, занятия проходят в комфортной обстановке. Объясняет понятно, не торопясь. Всем рекомендую данного репетитора!!!"</p>
+                    <p class="text-sm text-gray-500 mt-2">Avito</p>
+                </div>
+                <div class="testimonial-card bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-orange-100 text-orange-600 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Александра (родитель)</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic">"В школе у сына появились проблемы с информатикой, предмет новый, но уже возникали трудности. Начали заниматься с Евгением и не пожалели. Сын в восторге от занятий, не надо заставлять и напоминать. Онлайн занятия очень удобные, не надо тратить время на дорогу. Евгений всегда поможет и разберет темы, которые ребенок не усвоил в школе. Однозначно рекомендую. p.s. учебный год закончили на 5, ВПР по информатике за 7 класс написана на 5."</p>
+                </div>
+                <div class="testimonial-card bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-orange-100 text-orange-600 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Артем</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic">"Спасибо Евгению Александровичу за помощь в подготовке к ЕГЭ по информатике, сдал на 83 балла!!! Пришел с полным 0, занятия начали в феврале. Всем рекомендую данного репетитора!"</p>
+                    <p class="text-sm text-gray-500 mt-2">Avito</p>
+                </div>
+                <div class="testimonial-card bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-orange-100 text-orange-600 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Ольга</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic">"Замечательный преподаватель, объясняет доходчиво, ребенку очень нравится."</p>
+                    <p class="text-sm text-gray-500 mt-2">Avito</p>
+                </div>
+                <div class="testimonial-card bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-orange-100 text-orange-600 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Евгений</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic">"Занимался с сыном подготовкой к ОГЭ, изначальный уровень знаний был практически нулевой, за короткий промежуток времени подготовились к экзамену с промежуточной оценкой 4-5. Занятия закончили досрочно с хорошей уверенностью что экзамен сдадим. Цена приемлемая. Советую данного репетитора."</p>
+                    <p class="text-sm text-gray-500 mt-2">Avito</p>
+                </div>
+                <div class="testimonial-card bg-white p-6 rounded-lg shadow-md">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-orange-100 text-orange-600 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Олег Нестеров</h4>
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 italic">"Моему сыну очень понравилось заниматься онлайн с данным репетитором, хотя изначально такой формат вызывал у меня сомнения. ЕГЭ было сдано на 93 балла, спасибо огромное за знания!".</p>
+                    <p class="text-sm text-gray-500 mt-2">Avito</p>
+                </div>
+            </div>
+            <div class="text-center mt-12">
+                <a href="{% url 'odzew' %}"  class="bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-700 transition">Оставить отзыв</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Часто задаваемые вопросы</h2>
+                <div class="w-20 h-1 bg-orange-600 mx-auto"></div>
+            </div>
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden mb-4">
+                    <button class="faq-question w-full text-left px-6 py-4 bg-orange-50 font-semibold flex justify-between items-center">
+                        <span>С какого класса лучше начинать подготовку к ЕГЭ/ОГЭ?</span>
+                        <i class="fas fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-answer px-6 py-4 hidden">
+                        <p class="text-gray-600">Оптимально начинать подготовку с 10 класса для ЕГЭ и с 8 класса для ОГЭ. Это позволяет равномерно распределить нагрузку и глубоко проработать все темы. Однако даже если до экзамена осталось мало времени, интенсивная подготовка с опытным преподавателем поможет достичь хороших результатов.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden mb-4">
+                    <button class="faq-question w-full text-left px-6 py-4 bg-orange-50 font-semibold flex justify-between items-center">
+                        <span>Как проходят онлайн-занятия?</span>
+                        <i class="fas fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-answer px-6 py-4 hidden">
+                        <p class="text-gray-600">Занятия проводятся через Zoom, Skype или Discord с использованием интерактивной доски, презентаций и других учебных материалов. Каждый урок включает объяснение теории, разбор примеров и практических заданий, а также домашнее задание с проверкой. Все материалы и записи занятий доступны в личном кабинете ученика.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden mb-4">
+                    <button class="faq-question w-full text-left px-6 py-4 bg-orange-50 font-semibold flex justify-between items-center">
+                        <span>Как часто нужно заниматься для хорошего результата?</span>
+                        <i class="fas fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-answer px-6 py-4 hidden">
+                        <p class="text-gray-600">Рекомендуемая частота занятий - 2 раза в неделю по 60-90 минут. Для интенсивной подготовки можно увеличить до 3 занятий в неделю. Важно соблюдать регулярность и выполнять домашние задания. Индивидуальный график составляется с учетом уровня подготовки ученика и сроков до экзамена.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden mb-4">
+                    <button class="faq-question w-full text-left px-6 py-4 bg-orange-50 font-semibold flex justify-between items-center">
+                        <span>Какие материалы нужны для занятий?</span>
+                        <i class="fas fa-chevron-down transition-transform duration-300"></i>
+                    </button>
+                    <div class="faq-answer px-6 py-4 hidden">
+                        <p class="text-gray-600">Для занятий потребуется компьютер с доступом в интернет, веб-камера (желательно), тетрадь для записей и ручка. Все учебные материалы, включая теорию, практические задания и тесты, предоставляются в электронном виде. Дополнительные учебники могут быть рекомендованы в зависимости от уровня подготовки.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <img src="https://img.icons8.com/fluency/48/000000/owl.png" alt="Логотип" class="w-8 h-8">
+                        <span class="text-xl font-bold">IT Панфилов</span>
+                    </div>
+                    <p class="text-gray-400">Подготовка к ЕГЭ и ОГЭ по информатике с опытным преподавателем. Индивидуальный подход, высокие результаты.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Навигация</h4>
+                    <ul class="space-y-2">
+    <li><a href="javascript:void(0)" onclick="scrollToSection('home')" class="text-gray-400 hover:text-orange-400 transition cursor-pointer">Главная</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollToSection('about')" class="text-gray-400 hover:text-orange-400 transition cursor-pointer">Обо мне</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollToSection('benefits')" class="text-gray-400 hover:text-orange-400 transition cursor-pointer">Преимущества</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollToSection('courses')" class="text-gray-400 hover:text-orange-400 transition cursor-pointer">Курсы</a></li>
+    <li><a href="javascript:void(0)" onclick="scrollToSection('reviews')" class="text-gray-400 hover:text-orange-400 transition cursor-pointer">Отзывы</a></li>
+    <li><a href="{% url 'materials' %}" class="text-gray-400 hover:text-orange-400 transition">Бесплатные материалы</a></li>
+</ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Контакты</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-start">
+                            <i class="fas fa-phone-alt mt-1 mr-3"></i>
+                            <span>+7 (XXX) XXX-XX-XX</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope mt-1 mr-3"></i>
+                            <span>info@itpanfilov.ru</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-3"></i>
+                            <span>Онлайн занятия</span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Социальные сети</h4>
+                    <div class="flex space-x-4 mb-4">
+                        <a href="{% url 'vk' %}" class="bg-gray-700 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-orange-600 transition">
+                            <i class="fab fa-vk"></i>
+                        </a>
+                        <a href="{% url 'tg' %}" class="bg-gray-700 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-orange-600 transition">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                        <a href="{% url 'youtube' %}" class="bg-gray-700 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-orange-600 transition">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+
+                    </div>
+                    <p class="text-gray-400">Подписывайтесь, чтобы быть в курсе новостей и полезных материалов</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2023 IT Панфилов. Все права защищены.</p>
+                <p class="mt-2 text-sm"><a href="{% url 'polit' %}" class="hover:text-orange-400 transition">Политика конфиденциальности</a> | <a >Не является публичной офертой</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+         function scrollToSection(sectionId) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+            element.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    }
+        // FAQ accordion functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const faqQuestions = document.querySelectorAll('.faq-question');
+
+        faqQuestions.forEach(button => {
+            button.addEventListener('click', () => {
+                const answer = button.nextElementSibling;
+                const icon = button.querySelector('i');
+
+                // Toggle answer visibility
+                answer.classList.toggle('hidden');
+
+                // Rotate icon
+                icon.classList.toggle('fa-chevron-down');
+                icon.classList.toggle('fa-chevron-up');
+
+                // Close other open answers
+                faqQuestions.forEach(otherButton => {
+                    if (otherButton !== button) {
+                        const otherAnswer = otherButton.nextElementSibling;
+                        const otherIcon = otherButton.querySelector('i');
+
+                        otherAnswer.classList.add('hidden');
+                        otherIcon.classList.remove('fa-chevron-up');
+                        otherIcon.classList.add('fa-chevron-down');
+                    }
+                });
+            });
+        });
+    });
+
+        // Функции для мобильного меню
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+
+            menu.classList.toggle('open');
+            overlay.classList.toggle('active');
+            hamburger.classList.toggle('active');
+
+            // Блокировка прокрутки body при открытом меню
+            if (menu.classList.contains('open')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function closeMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+
+            menu.classList.remove('open');
+            overlay.classList.remove('active');
+            hamburger.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Инициализация гамбургера
+        document.getElementById('hamburger').addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleMobileMenu();
+        });
+
+        document.getElementById('closeMenu').addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeMobileMenu();
+        });
+
+        document.getElementById('menuOverlay').addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeMobileMenu();
+        });
+
+        // Закрытие меню при клике на ссылки
+        document.querySelectorAll('#mobileMenu a').forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Закрытие меню при ресайзе окна (если перешли на десктоп)
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                closeMobileMenu();
+            }
+        });
+
+        // Остальные функции остаются без изменений
+        function scrollToElement() {
+            const element = document.getElementById('QQQQ');
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // FAQ accordion functionality
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const answer = button.nextElementSibling;
+                const icon = button.querySelector('i');
+
+                // Toggle answer visibility
+                answer.classList.toggle('hidden');
+
+                // Rotate icon
+                icon.classList.toggle('transform');
+                icon.classList.toggle('rotate-180');
+
+                // Close other open answers
+                document.querySelectorAll('.faq-question').forEach(otherButton => {
+                    if (otherButton !== button) {
+                        otherButton.nextElementSibling.classList.add('hidden');
+                        otherButton.querySelector('i').classList.remove('transform', 'rotate-180');
+                    }
+                });
+            });
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                if (this.getAttribute('href') !== '#') {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    closeMobileMenu();
+                }
+            });
+        });
+
+        function scrollToElement() {
+        const element = document.getElementById('QQQQ');
+        element.scrollIntoView({ behavior: 'smooth' });
+    }
+        // FAQ accordion functionality
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const answer = button.nextElementSibling;
+                const icon = button.querySelector('i');
+
+                // Toggle answer visibility
+                answer.classList.toggle('hidden');
+
+                // Rotate icon
+                icon.classList.toggle('transform');
+                icon.classList.toggle('rotate-180');
+
+                // Close other open answers
+                document.querySelectorAll('.faq-question').forEach(otherButton => {
+                    if (otherButton !== button) {
+                        otherButton.nextElementSibling.classList.add('hidden');
+                        otherButton.querySelector('i').classList.remove('transform', 'rotate-180');
+                    }
+                });
+            });
+        });
+
+        // Smooth scrolling for anchor links and active nav state
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+
+                // Remove active class from all nav links
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                });
+
+                // Add active class to clicked link
+                this.classList.add('active');
+
+                // Close mobile menu if open
+                const menu = document.getElementById('mobileMenu');
+                if (!menu.classList.contains('hidden')) {
+                    toggleMobileMenu();
+                }
+            });
+        });
+
+        // Update active nav link on scroll
+        window.addEventListener('scroll', function() {
+            const scrollPosition = window.scrollY;
+
+            document.querySelectorAll('section').forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                const sectionHeight = section.offsetHeight;
+                const sectionId = section.getAttribute('id');
+
+                if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${sectionId}`) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

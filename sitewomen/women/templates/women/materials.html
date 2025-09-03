@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бесплатные материалы</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="https://img.icons8.com/fluency/48/000000/owl.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .owl-logo {
+            position: relative;
+        }
+
+        .owl-logo::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: rgba(249, 115, 22, 0.2);
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+
+        .file-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(237, 137, 54, 0.4);
+        }
+
+        .link-card:hover {
+            transform: scale(1.03);
+        }
+
+        /* Стили для мобильного меню */
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+
+        .hamburger-line {
+            transition: all 0.3s ease;
+        }
+
+        .hamburger.active .hamburger-line:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .hamburger.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active .hamburger-line:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        .menu-overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'index' %}" class="owl-logo">
+                    <img src="https://img.icons8.com/fluency/48/000000/owl.png" alt="Логотип" class="w-10 h-10">
+                </a>
+                <span class="text-xl font-bold text-orange-600">IT Панфилов</span>
+            </div>
+
+
+
+            <div class="hidden md:flex space-x-4">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile' %}" class="relative bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 group">
+                        <i class="fas fa-user-circle mr-2 text-sm transition-all duration-300 group-hover:text-orange-200"></i>Личный кабинет
+                    </a>
+                    <form method="post" action="{% url 'logout' %}" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="border-2 border-orange-600 text-orange-600 px-4 py-2 rounded-lg font-semibold hover:bg-orange-50 transition">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Выйти
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="border border-orange-600 text-orange-600 px-4 py-2 rounded-lg font-medium hover:bg-orange-50 transition">
+                        Вход
+                    </a>
+                    <a href="{% url 'register' %}" class="bg-gradient-to-r from-orange-600 to-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-700 hover:to-orange-600 transition shadow-md hover:shadow-lg">
+                        Регистрация
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile Hamburger -->
+            <div class="md:hidden">
+                <button id="hamburger" class="hamburger flex flex-col space-y-1.5 w-6 h-6 justify-center items-center relative z-60">
+                    <span class="hamburger-line w-6 h-0.5 bg-orange-600"></span>
+                    <span class="hamburger-line w-6 h-0.5 bg-orange-600"></span>
+                    <span class="hamburger-line w-6 h-0.5 bg-orange-600"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="menuOverlay" class="menu-overlay fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="mobile-menu fixed top-0 right-0 w-80 h-full bg-white shadow-2xl z-50 overflow-y-auto md:hidden">
+            <div class="p-6 space-y-6">
+                <div class="flex justify-between items-center border-b border-gray-200 pb-4">
+                    <div class="flex items-center space-x-2">
+                        <img src="https://img.icons8.com/fluency/48/000000/owl.png" alt="Логотип" class="w-8 h-8">
+                        <span class="text-lg font-bold text-orange-600">IT Панфилов</span>
+                    </div>
+                    <button id="closeMenu" class="text-gray-500 hover:text-orange-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+
+
+                <div class="border-t border-gray-200 pt-6">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profile' %}" class="block bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:from-orange-600 hover:to-orange-700 transition mb-4 text-center" onclick="closeMobileMenu()">
+                            <i class="fas fa-user-circle mr-2"></i>Личный кабинет
+                        </a>
+                        <form method="post" action="{% url 'logout' %}" class="inline-block w-full">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full border-2 border-orange-600 text-orange-600 px-4 py-2.5 rounded-lg font-semibold hover:bg-orange-50 transition text-center" onclick="closeMobileMenu()">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Выйти
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="block border border-orange-600 text-orange-600 px-4 py-2 rounded-lg font-medium hover:bg-orange-50 transition mb-3 text-center" onclick="closeMobileMenu()">
+                            Вход
+                        </a>
+                        <a href="{% url 'register' %}" class="block bg-gradient-to-r from-orange-600 to-orange-500 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-700 hover:to-orange-600 transition shadow-md hover:shadow-lg text-center" onclick="closeMobileMenu()">
+                            Регистрация
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Социальные сети в мобильном меню -->
+                <div class="border-t border-gray-200 pt-6">
+                    <h4 class="text-lg font-semibold mb-4 text-gray-800">Социальные сети</h4>
+                    <div class="flex space-x-4">
+                        <a href="{% url 'vk' %}" class="bg-gray-100 text-orange-600 w-12 h-12 rounded-full flex items-center justify-center hover:bg-orange-600 hover:text-white transition">
+                            <i class="fab fa-vk"></i>
+                        </a>
+                        <a href="{% url 'tg' %}" class="bg-gray-100 text-orange-600 w-12 h-12 rounded-full flex items-center justify-center hover:bg-orange-600 hover:text-white transition">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                        <a href="{% url 'youtube' %}" class="bg-gray-100 text-orange-600 w-12 h-12 rounded-full flex items-center justify-center hover:bg-orange-600 hover:text-white transition">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Hero Section -->
+        <section class="mb-12">
+            <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                <div class="flex flex-col md:flex-row items-center">
+                    <div class="md:w-2/3 mb-6 md:mb-0 md:pr-8">
+                        <h2 class="text-3xl md:text-4xl font-bold text-orange-600 mb-4" id="QQQQ">
+                            Бесплатные материалы!
+                        </h2>
+                        <p class="text-gray-700 text-lg mb-6">
+                            Мы собрали для тебя все необходимые материалы для подготовки к ЕГЭ и ОГЭ по информатике.
+                            Чек-листы, демоверсии и проверенные ресурсы - всё в одном месте!
+                        </p>
+                    </div>
+                    <div class="md:w-1/3">
+                        <img src="https://img.icons8.com/color/512/owl.png" alt="Мудрая сова" class="w-full h-auto max-w-xs mx-auto">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Files Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-folder-open text-orange-500 mr-3"></i> Файлики для подготовки
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- File Card 1 -->
+                <div class="file-card bg-white rounded-xl shadow-md p-6 transition duration-300">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mr-4">
+                            <i class="fas fa-list-check text-orange-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800">Чек-лист подготовки</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        Полный список тем и задач, которые нужно изучить для успешной сдачи ЕГЭ по информатике.
+                    </p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500"><pre>PDF,  0.412 MB</pre></span>
+                        <button class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-full text-sm transition duration-300">
+                            <a href="https://disk.yandex.ru/i/QCjzLdqjAj-2Gw">Скачать</a> <i class="fas fa-arrow-down ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- File Card 2 -->
+                <div class="file-card bg-white rounded-xl shadow-md p-6 transition duration-300">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mr-4">
+                            <i class="fas fa-file-pdf text-orange-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800">Демоверсия ЕГЭ 2026</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        Официальная демонстрационная версия экзамена по информатике для подготовки к ЕГЭ 2026 года.
+                    </p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500"><pre>PDF,  5.319 MB</pre></span>
+                        <button class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-full text-sm transition duration-300">
+                            <a href="https://disk.yandex.ru/d/wa3XCA4C100aSg">Скачать</a> <i class="fas fa-arrow-down ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Links Section -->
+        <section>
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-link text-orange-500 mr-3"></i> Полезные ссылки
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Link Card 1 -->
+                <a href="{% url 'rewy-ege' %}" target="_blank" class="link-card bg-white rounded-xl shadow-md p-6 transition duration-300 hover:shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mr-4">
+                            <i class="fas fa-laptop-code text-orange-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800">Решу ЕГЭ</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        Популярный портал для подготовки к ЕГЭ с огромной базой заданий и возможностью онлайн-проверки.
+                    </p>
+                    <div class="flex justify-end">
+                        <span class="text-orange-500 font-semibold">Перейти <i class="fas fa-external-link-alt ml-1"></i></span>
+                    </div>
+                </a>
+
+                <!-- Link Card 2 -->
+                <a href="{% url 'rewy-ore' %}" target="_blank" class="link-card bg-white rounded-xl shadow-md p-6 transition duration-300 hover:shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mr-4">
+                            <i class="fas fa-book-open text-orange-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800">Решу ОГЭ</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        Материалы для подготовки к основному государственному экзамену по информатике.
+                    </p>
+                    <div class="flex justify-end">
+                        <span class="text-orange-500 font-semibold">Перейти <i class="fas fa-external-link-alt ml-1"></i></span>
+                    </div>
+                </a>
+
+                <!-- Link Card 3 -->
+                <a href="{% url 'vipi' %}" target="_blank" class="link-card bg-white rounded-xl shadow-md p-6 transition duration-300 hover:shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mr-4">
+                            <i class="fas fa-university text-orange-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800">Банк заданий ФИПИ</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        Официальные задания от Федерального института педагогических измерений.
+                    </p>
+                    <div class="flex justify-end">
+                        <span class="text-orange-500 font-semibold">Перейти <i class="fas fa-external-link-alt ml-1"></i></span>
+                    </div>
+                </a>
+
+                <!-- Link Card 4 -->
+                <a href="{% url 'polakov' %}" target="_blank" class="link-card bg-white rounded-xl shadow-md p-6 transition duration-300 hover:shadow-lg">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center mr-4">
+                            <i class="fas fa-user-graduate text-orange-500 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800">Сайт К.Ю. Полякова</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        Автор учебников по информатике. На сайте представлены материалы для подготовки к ЕГЭ.
+                    </p>
+                    <div class="flex justify-end">
+                        <span class="text-orange-500 font-semibold">Перейти <i class="fas fa-external-link-alt ml-1"></i></span>
+                    </div>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <img src="https://img.icons8.com/fluency/48/000000/owl.png" alt="Логотип" class="w-8 h-8">
+                        <span class="text-xl font-bold">IT Панфилов</span>
+                    </div>
+                    <p class="text-gray-400">Подготовка к ЕГЭ и ОГЭ по информатике с опытным преподавателем. Индивидуальный подход, высокие результаты.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Навигация</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'index' %}" class="text-gray-400 hover:text-orange-400 transition">Главная</a></li>
+                        <li><a href="{% url 'index' %}" class="text-gray-400 hover:text-orange-400 transition">Обо мне</a></li>
+                        <li><a href="{% url 'index' %}" class="text-gray-400 hover:text-orange-400 transition">Преимущества</a></li>
+                        <li><a href="{% url 'index' %}" class="text-gray-400 hover:text-orange-400 transition">Курсы</a></li>
+                        <li><a href="{% url 'index' %}" class="text-gray-400 hover:text-orange-400 transition">Отзывы</a></li>
+                        <li><button class="text-gray-400 hover:text-orange-400 transition" onclick="scrollToElement()">Бесплатные материалы</button></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Контакты</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-start">
+                            <i class="fas fa-phone-alt mt-1 mr-3"></i>
+                            <span>+7 (XXX) XXX-XX-XX</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-envelope mt-1 mr-3"></i>
+                            <span>info@itpanfilov.ru</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt mt-1 mr-3"></i>
+                            <span>Онлайн занятия</span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Социальные сети</h4>
+                    <div class="flex space-x-4 mb-4">
+                        <a href="{% url 'vk' %}" class="bg-gray-700 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-orange-600 transition">
+                            <i class="fab fa-vk"></i>
+                        </a>
+                        <a href="{% url 'tg' %}" class="bg-gray-700 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-orange-600 transition">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                        <a href="{% url 'youtube' %}" class="bg-gray-700 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-orange-600 transition">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                    <p class="text-gray-400">Подписывайтесь, чтобы быть в курсе новостей и полезных материалов</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2023 IT Панфилов. Все права защищены.</p>
+                <p class="mt-2 text-sm"><a href="{% url 'polit' %}" class="hover:text-orange-400 transition">Политика конфиденциальности</a> | <a>Не является публичной офертой</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function scrollToElement() {
+            const element = document.getElementById('QQQQ');
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Функции для мобильного меню
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+
+            menu.classList.toggle('open');
+            overlay.classList.toggle('active');
+            hamburger.classList.toggle('active');
+
+            if (menu.classList.contains('open')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function closeMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            const hamburger = document.getElementById('hamburger');
+
+            menu.classList.remove('open');
+            overlay.classList.remove('active');
+            hamburger.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Инициализация гамбургера
+        document.getElementById('hamburger').addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleMobileMenu();
+        });
+
+        document.getElementById('closeMenu').addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeMobileMenu();
+        });
+
+        document.getElementById('menuOverlay').addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeMobileMenu();
+        });
+
+        // Закрытие меню при клике на ссылки
+        document.querySelectorAll('#mobileMenu a').forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Закрытие меню при ресайзе окна
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                closeMobileMenu();
+            }
+        });
+
+        // Плавная прокрутка для якорных ссылок
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                if (this.getAttribute('href') !== '#') {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

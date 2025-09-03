@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .owl-logo {
+            position: relative;
+        }
+        .owl-logo::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        right: -10px;
+        bottom: -10px;
+        background: rgba(249, 115, 22, 0.2);
+        border-radius: 50%;
+        z-index: -1;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.7; }
+        50% { transform: scale(1.05); opacity: 0.3; }
+        100% { transform: scale(1); opacity: 0.7; }
+    }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Навигация -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'index' %}" class="owl-logo">
+    <img src="https://img.icons8.com/fluency/48/000000/owl.png" alt="Логотип" class="w-10 h-10">
+            </a>
+                <span class="text-xl font-bold text-orange-600">IT Панфилов</span>
+            </div>
+            <div class="flex space-x-4">
+                <form method="post" action="{% url 'logout' %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Выйти
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Контент личного кабинета -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Личный кабинет</h1>
+
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <div class="text-center mb-8">
+                    <div class="w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user text-4xl text-orange-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-semibold text-gray-800">
+                        {% if user.first_name %}
+                            {{ user.first_name }}
+                        {% else %}
+                            {{ user.email }}
+                        {% endif %}
+                    </h2>
+                    <p class="text-gray-600 mt-2">{{ user.email }}</p>
+                    <p class="text-gray-600">Дата регистрации: {{ user.date_joined|date:"d.m.Y" }}</p>
+                </div>
+
+
+
+
+
+                <!-- Быстрые действия -->
+                <div class="text-center">
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <a href="/" class="bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-orange-700 transition">
+                            <i class="fas fa-home mr-2"></i>На главную
+                        </a>
+                        <a href="{% url 'materials' %}" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition">
+                            <i class="fas fa-download mr-2"></i>Материалы
+                        </a>
+                        <a href="{% url 'settings' %}" class="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition">
+                            <i class="fas fa-cog mr-2"></i>Настройки
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Сообщение если имя не указано -->
+                {% if not user.first_name %}
+                <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle text-yellow-600 mr-3"></i>
+                        <div>
+                            <p class="text-yellow-800 font-medium">Вы не указали имя</p>
+                            <p class="text-yellow-700 text-sm">Рекомендуем добавить имя в настройках профиля</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

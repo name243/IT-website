@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройки аккаунта</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Стили для всплывающих сообщений */
+        .notification-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .notification {
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            animation: slideInUp 0.5s forwards;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-left: 4px solid #047857;
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border-left: 4px solid #b91c1c;
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border-left: 4px solid #b45309;
+        }
+
+        .notification-content {
+            flex-grow: 1;
+            padding-right: 20px;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+        .notification-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes slideInUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutDown {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+        }
+
+        .notification.hide {
+            animation: slideOutDown 0.5s forwards;
+        }
+
+        .owl-logo {
+            position: relative;
+        }
+        .owl-logo::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: rgba(249, 115, 22, 0.2);
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+
+        .settings-card {
+            transition: all 0.3s ease;
+        }
+
+        .settings-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .avatar-upload {
+            position: relative;
+            display: inline-block;
+        }
+
+        .avatar-upload-label {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .avatar-upload-label:hover {
+            transform: scale(1.05);
+        }
+
+        .avatar-edit {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            background: white;
+            border-radius: 50%;
+            padding: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <!-- Блок для всплывающих сообщений -->
+    <div id="notification-container" class="notification-container"></div>
+
+    <!-- Скрытый блок для сообщений Django -->
+    <div id="django-messages" style="display: none;">
+        {% if messages %}
+            {% for message in messages %}
+                <div data-type="{{ message.tags }}" data-text="{{ message }}"></div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Навигация -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <a href="{% url 'index' %}" class="owl-logo">
+                    <img src="https://img.icons8.com/fluency/48/000000/owl.png" alt="Логотип" class="w-10 h-10">
+                </a>
+                <span class="text-xl font-bold text-orange-600">IT Панфилов</span>
+            </div>
+            <div class="flex space-x-4">
+                <a href="{% url 'profile' %}" class="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-700 transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Назад
+                </a>
+                <form method="post" action="{% url 'logout' %}" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Выйти
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Контент настроек -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Настройки аккаунта</h1>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Основная информация -->
+                <div class="settings-card bg-white rounded-lg shadow-lg p-6 md:col-span-2">
+                    <div class="flex items-center mb-6">
+                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user-edit text-orange-600 text-xl"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-800">Основная информация</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Аватар -->
+                        <div class="md:col-span-1">
+                            <div class="text-center">
+                                <div class="avatar-upload inline-block relative">
+                                    <label for="avatar-upload" class="avatar-upload-label">
+                                        <div class="w-32 h-32 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 relative">
+                                            {% if user.profile.avatar %}
+                                                <img src="{{ user.profile.avatar.url }}" alt="Аватар" class="w-full h-full rounded-full object-cover">
+                                            {% else %}
+                                                <i class="fas fa-user text-5xl text-orange-600"></i>
+                                            {% endif %}
+                                            <div class="avatar-edit">
+                                                <i class="fas fa-camera text-orange-600 text-sm"></i>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    <input type="file" id="avatar-upload" class="hidden" accept="image/*">
+                                </div>
+                                <p class="text-sm text-gray-500 mt-2">Нажмите на фото для изменения</p>
+                                <p class="text-xs text-gray-400">JPG, PNG до 2MB</p>
+                            </div>
+                        </div>
+
+                        <!-- Форма -->
+                        <div class="md:col-span-2">
+                            <form method="post" class="space-y-4">
+                                {% csrf_token %}
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Имя</label>
+                                        <input type="text" name="first_name" value="{{ user.first_name }}"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                               placeholder="Введите ваше имя">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Фамилия</label>
+                                        <input type="text" name="last_name" value="{{ user.last_name }}"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                               placeholder="Введите вашу фамилию">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Телефон</label>
+                                    <input type="tel" name="phone" value="{{ user.profile.phone|default:'' }}"
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                           placeholder="+7 (999) 999-99-99">
+                                    <p class="text-sm text-gray-500 mt-1">Телефон для связи</p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                    <input type="email" value="{{ user.email }}" disabled
+                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500">
+                                    <p class="text-sm text-gray-500 mt-1">Email нельзя изменить</p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">О себе</label>
+                                    <textarea name="bio" rows="3"
+                                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                              placeholder="Расскажите немного о себе">{{ user.profile.bio|default:'' }}</textarea>
+                                </div>
+
+                                <button type="submit" name="save_profile" class="w-full bg-orange-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-700 transition">
+                                    <i class="fas fa-save mr-2"></i>Сохранить изменения
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Смена пароля -->
+                <div class="settings-card bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-lock text-blue-600 text-xl"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-800">Безопасность</h2>
+                    </div>
+
+                    <form method="post" class="space-y-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="change_password">
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Текущий пароль</label>
+                            <div class="relative">
+                                <input type="password" name="current_password" id="current_password"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 pr-10"
+                                       required placeholder="Введите текущий пароль">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Новый пароль</label>
+                            <div class="relative">
+                                <input type="password" name="new_password" id="new_password"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 pr-10"
+                                       required placeholder="Введите новый пароль">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Подтвердите пароль</label>
+                            <div class="relative">
+                                <input type="password" name="confirm_password" id="confirm_password"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 pr-10"
+                                       required placeholder="Повторите новый пароль">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition">
+                            <i class="fas fa-key mr-2"></i>Сменить пароль
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Быстрые действия -->
+                <div class="settings-card bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-cog text-purple-600 text-xl"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-gray-800">Действия</h2>
+                    </div>
+
+                    <div class="space-y-3">
+                        <a href="{% url 'profile' %}" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                            <i class="fas fa-user-circle text-orange-600 mr-3"></i>
+                            <span>Вернуться в профиль</span>
+                        </a>
+
+                        <a href="{% url 'materials' %}" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                            <i class="fas fa-download text-green-600 mr-3"></i>
+                            <span>Бесплатные материалы</span>
+                        </a>
+
+                        <a href="{% url 'index' %}" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                            <i class="fas fa-home text-blue-600 mr-3"></i>
+                            <span>На главную страницу</span>
+                        </a>
+
+                        <div class="border-t border-gray-200 pt-3 mt-3">
+                            <button class="flex items-center p-3 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition w-full">
+                                <i class="fas fa-trash-alt mr-3"></i>
+                                <span>Удалить аккаунт</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Информация о системе -->
+            <div class="mt-8 bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Системная информация</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div>
+                        <p><strong>Дата регистрации:</strong> {{ user.date_joined|date:"d.m.Y" }}</p>
+                        <p><strong>Последний вход:</strong> {{ user.last_login|date:"d.m.Y H:i"|default:"Недавно" }}</p>
+                    </div>
+                    <div>
+                        <p><strong>ID пользователя:</strong> {{ user.id }}</p>
+                        <p><strong>Статус аккаунта:</strong>
+                            <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                                Активен
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Функция для показа всплывающего сообщения
+        function showNotification(message, type = 'success') {
+            const container = document.getElementById('notification-container');
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <div class="flex items-center">
+                        <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-exclamation-triangle'} mr-3"></i>
+                        <span>${message}</span>
+                    </div>
+                </div>
+                <button class="notification-close" onclick="closeNotification(this.parentElement)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            container.appendChild(notification);
+
+            // Автоматическое закрытие через 5 секунд
+            setTimeout(() => closeNotification(notification), 5000);
+        }
+
+        // Функция для закрытия сообщения
+        function closeNotification(notification) {
+            notification.classList.add('hide');
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.parentElement.removeChild(notification);
+                }
+            }, 500);
+        }
+
+        // Показываем сообщения из Django
+        document.addEventListener('DOMContentLoaded', function() {
+            const djangoMessages = document.getElementById('django-messages');
+            const messages = djangoMessages.querySelectorAll('div[data-type]');
+
+            messages.forEach(messageDiv => {
+                const type = messageDiv.getAttribute('data-type') || 'success';
+                const text = messageDiv.getAttribute('data-text');
+                showNotification(text, type);
+            });
+
+            // Очищаем скрытый контейнер
+            djangoMessages.innerHTML = '';
+        });
+
+        // Функция для показа/скрытия пароля
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.parentNode.querySelector('.password-toggle');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Добавляем иконки глаз для полей пароля
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordFields = ['current_password', 'new_password', 'confirm_password'];
+
+            passwordFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    const parent = field.parentNode;
+                    parent.classList.add('relative');
+
+                    const eyeIcon = document.createElement('i');
+                    eyeIcon.className = 'fas fa-eye password-toggle absolute right-3 top-3 text-gray-400 cursor-pointer';
+                    eyeIcon.onclick = () => togglePassword(fieldId);
+
+                    parent.appendChild(eyeIcon);
+                }
+            });
+        });
+
+        // Обработка загрузки аватара
+        document.getElementById('avatar-upload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    showNotification('Файл слишком большой. Максимальный размер: 2MB', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatarContainer = document.querySelector('.avatar-upload-label > div');
+                    if (avatarContainer) {
+                        avatarContainer.innerHTML = `
+                            <img src="${e.target.result}" alt="Аватар" class="w-full h-full rounded-full object-cover">
+                            <div class="avatar-edit">
+                                <i class="fas fa-camera text-orange-600 text-sm"></i>
+                            </div>
+                        `;
+                        showNotification('Аватар успешно загружен', 'success');
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+{% extends 'users/base_auth.html' %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+
+
+
+<h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">Создать аккаунт</h2>
+
+<form method="post" action="{% url 'register' %}" id="registration-form">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+        {% for error in form.non_field_errors %}
+        {{ error }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Новое поле: Имя -->
+    <div class="mb-4">
+        <label for="id_first_name" class="block text-gray-700 text-sm font-medium mb-2">Имя</label>
+        <div class="relative">
+            <input type="text" name="first_name" id="id_first_name" required
+                   class="form-input {% if form.first_name.errors %}border-red-500{% endif %}"
+                   placeholder="Ваше имя"
+                   value="{{ form.first_name.value|default:'' }}"
+                   oninput="validateName()">
+            <i class="fas fa-user absolute right-3 top-3 text-gray-400"></i>
+        </div>
+        {% if form.first_name.errors %}
+        <div class="error-message">
+            {% for error in form.first_name.errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div id="name-error" class="error-message hidden"></div>
+    </div>
+
+    <div class="mb-4">
+        <label for="id_email" class="block text-gray-700 text-sm font-medium mb-2">Email</label>
+        <div class="relative">
+            <input type="email" name="email" id="id_email" required
+                   class="form-input {% if form.email.errors %}border-red-500{% endif %}"
+                   placeholder="Ваш email"
+                   value="{{ form.email.value|default:'' }}"
+                   oninput="validateEmail()">
+            <i class="fas fa-envelope absolute right-3 top-3 text-gray-400"></i>
+        </div>
+        {% if form.email.errors %}
+        <div class="error-message">
+            {% for error in form.email.errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div id="email-error" class="error-message hidden"></div>
+    </div>
+
+    <div class="mb-4">
+        <label for="id_password1" class="block text-gray-700 text-sm font-medium mb-2">Пароль</label>
+        <div class="relative">
+            <input type="password" name="password1" id="id_password1" required
+                   class="form-input {% if form.password1.errors %}border-red-500{% endif %}"
+                   placeholder="Придумайте пароль"
+                   oninput="validatePassword()">
+            <i class="fas fa-eye password-toggle" onclick="togglePassword('id_password1')"></i>
+        </div>
+        <div class="text-xs text-gray-500 mt-1">
+            Пароль должен содержать: не менее 8 символов, цифры и буквы
+        </div>
+        {% if form.password1.errors %}
+        <div class="error-message">
+            {% for error in form.password1.errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div id="password-error" class="error-message hidden"></div>
+    </div>
+
+    <div class="mb-6">
+        <label for="id_password2" class="block text-gray-700 text-sm font-medium mb-2">Повторите пароль</label>
+        <div class="relative">
+            <input type="password" name="password2" id="id_password2" required
+                   class="form-input {% if form.password2.errors %}border-red-500{% endif %}"
+                   placeholder="Повторите пароль"
+                   oninput="validatePasswordMatch()">
+            <i class="fas fa-eye password-toggle" onclick="togglePassword('id_password2')"></i>
+        </div>
+        {% if form.password2.errors %}
+        <div class="error-message">
+            {% for error in form.password2.errors %}
+            {{ error }}
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div id="password-match-error" class="error-message hidden"></div>
+    </div>
+
+    <button type="submit" id="submit-btn"
+            class="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed">
+        Зарегистрироваться
+    </button>
+</form>
+
+<div class="mt-6 text-center">
+    <p class="text-gray-600">У вас уже есть аккаунт?
+        <a href="{% url 'login' %}" class="text-orange-600 hover:text-orange-800 font-medium">
+            Тогда, пожалуйста, войдите в систему.
+        </a>
+    </p>
+</div>
+
+<script>
+    // Валидация имени в реальном времени
+    function validateName() {
+        const nameInput = document.getElementById('id_first_name');
+        const nameError = document.getElementById('name-error');
+        const name = nameInput.value.trim();
+
+        if (name && name.length < 2) {
+            nameError.textContent = 'Имя должно содержать не менее 2 символов';
+            nameError.classList.remove('hidden');
+            nameInput.classList.add('border-red-500');
+            return false;
+        } else if (name && !/^[a-zA-Zа-яА-ЯёЁ\s]+$/.test(name)) {
+            nameError.textContent = 'Имя должно содержать только буквы';
+            nameError.classList.remove('hidden');
+            nameInput.classList.add('border-red-500');
+            return false;
+        } else {
+            nameError.classList.add('hidden');
+            nameInput.classList.remove('border-red-500');
+            return true;
+        }
+    }
+
+    // Остальные функции валидации остаются без изменений
+    function validateEmail() {
+        const emailInput = document.getElementById('id_email');
+        const emailError = document.getElementById('email-error');
+        const email = emailInput.value.trim();
+
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+        if (email && !emailRegex.test(email)) {
+            emailError.textContent = 'Введите корректный email адрес';
+            emailError.classList.remove('hidden');
+            emailInput.classList.add('border-red-500');
+            return false;
+        } else {
+            emailError.classList.add('hidden');
+            emailInput.classList.remove('border-red-500');
+            return true;
+        }
+    }
+
+    function validatePassword() {
+        const passwordInput = document.getElementById('id_password1');
+        const passwordError = document.getElementById('password-error');
+        const password = passwordInput.value;
+
+        if (password.length > 0 && password.length < 8) {
+            passwordError.textContent = 'Пароль должен содержать не менее 8 символов';
+            passwordError.classList.remove('hidden');
+            passwordInput.classList.add('border-red-500');
+            return false;
+        } else if (password.length >= 8 && (!/\d/.test(password) || !/[a-zA-Z]/.test(password))) {
+            passwordError.textContent = 'Пароль должен содержать цифры и буквы';
+            passwordError.classList.remove('hidden');
+            passwordInput.classList.add('border-red-500');
+            return false;
+        } else {
+            passwordError.classList.add('hidden');
+            passwordInput.classList.remove('border-red-500');
+            return true;
+        }
+    }
+
+    function validatePasswordMatch() {
+        const password1 = document.getElementById('id_password1').value;
+        const password2 = document.getElementById('id_password2').value;
+        const matchError = document.getElementById('password-match-error');
+        const password2Input = document.getElementById('id_password2');
+
+        if (password2 && password1 !== password2) {
+            matchError.textContent = 'Пароли не совпадают';
+            matchError.classList.remove('hidden');
+            password2Input.classList.add('border-red-500');
+            return false;
+        } else {
+            matchError.classList.add('hidden');
+            password2Input.classList.remove('border-red-500');
+            return true;
+        }
+    }
+
+    // Валидация всей формы перед отправкой
+    document.getElementById('registration-form').addEventListener('submit', function(e) {
+        const isNameValid = validateName();
+        const isEmailValid = validateEmail();
+        const isPasswordValid = validatePassword();
+        const isPasswordMatchValid = validatePasswordMatch();
+
+        if (!isNameValid || !isEmailValid || !isPasswordValid || !isPasswordMatchValid) {
+            e.preventDefault();
+        }
+    });
+
+    // Динамическая проверка полей
+    document.getElementById('id_first_name').addEventListener('blur', validateName);
+    document.getElementById('id_email').addEventListener('blur', validateEmail);
+    document.getElementById('id_password1').addEventListener('blur', validatePassword);
+    document.getElementById('id_password2').addEventListener('blur', validatePasswordMatch);
+</script>
+{% endblock %}

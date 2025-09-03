@@ -1,0 +1,57 @@
+{% extends 'users/base_auth.html' %}
+
+{% block title %}Вход в систему{% endblock %}
+
+{% block content %}
+<h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">Вход в аккаунт</h2>
+
+<form method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+        {% for error in form.non_field_errors %}
+        {{ error }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="mb-4">
+        <label for="id_username" class="block text-gray-700 text-sm font-medium mb-2">Email</label>
+        <div class="relative">
+            <input type="email" name="username" id="id_username" required
+                   class="form-input"
+                   placeholder="Ваш email">
+            <i class="fas fa-envelope absolute right-3 top-3 text-gray-400"></i>
+        </div>
+    </div>
+
+    <div class="mb-6">
+        <label for="id_password" class="block text-gray-700 text-sm font-medium mb-2">Пароль</label>
+        <div class="relative">
+            <input type="password" name="password" id="id_password" required
+                   class="form-input"
+                   placeholder="Ваш пароль">
+            <i class="fas fa-eye password-toggle" onclick="togglePassword('id_password')"></i>
+        </div>
+
+        <!-- Кнопка "Забыли пароль?" -->
+        <div class="mt-2 text-right">
+            <a href="{% url 'password_reset' %}" class="text-sm text-orange-600 hover:text-orange-800 font-medium">
+                Забыли пароль?
+            </a>
+        </div>
+    </div>
+
+    <button type="submit"
+            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300">
+        Войти
+    </button>
+</form>
+
+<div class="mt-6 text-center">
+    <p class="text-gray-600">Ещё нет аккаунта?
+        <a href="{% url 'register' %}" class="text-orange-600 hover:text-orange-800 font-medium">Зарегистрироваться</a>
+    </p>
+</div>
+{% endblock %}
