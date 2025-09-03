@@ -11,7 +11,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
-    'women.apps.WomenConfig',
+    'main.apps.WomenConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -31,7 +31,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'sitewomen.urls'
+ROOT_URLCONF = 'site_1.urls'
 
 TEMPLATES = [
     {

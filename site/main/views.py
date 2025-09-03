@@ -5,15 +5,15 @@ from django.shortcuts import redirect
 
 
 def index(request):
-    return render(request, 'women/index.html')
+    return render(request, 'main/index.html')
 def materials(request):
-    return render(request, 'women/materials.html')
+    return render(request, 'main/materials.html')
 def polit(request):
-    return render(request, 'women/polit.html')
+    return render(request, 'main/polit.html')
 def register(request):
-    return render(request, 'users/register.html')
+    return render(request, 'main/register.html')
 def login(request):
-    return render(request, 'users/login.html')
+    return render(request, 'main/login.html')
 
 
 
